@@ -17,7 +17,6 @@ import re
 import sys
 import time
 import tinyAPI
-import traceback
 
 __all__ = [
     'CLI',

@@ -29,6 +29,15 @@ __all__ = [
 
 CLI_STOP_SIGNAL_FILE = '/tmp/APP_STOP_CLI'
 
+log_file = ConfigManager().value('cli log file')
+if log_file:
+    logging.basicConfig(filename = log_file)
+else:
+    logging.basicConfig()
+
+# Obtain the root logger
+logger = logging.getLogger()
+
 # ----- Public Functions  -----------------------------------------------------
 
 def cli_main(function, args=None, stop_on_signal=True):
@@ -45,7 +54,7 @@ def cli_main(function, args=None, stop_on_signal=True):
     try:
         function(cli)
     except Exception as e:
-        _handle_cli_exception_logging(e)
+        logger.exception(e)
 
         cli.set_status_error()
         tinyAPI.dsh().rollback(True)
@@ -292,12 +301,3 @@ class CLIOutputRenderer(object):
         body += ' ' * (width - 2 - len(body)) + "|\n"
 
         return enclosure + body + enclosure
-
-# ----- Private Functions  ----------------------------------------------------
-
-def _handle_cli_exception_logging(e):
-    log_file = ConfigManager().value('cli log file')
-    if log_file:
-        logging.basicConfig(filename = log_file)
-        logging.critical(traceback.format_exc())
-        logging.shutdown()
